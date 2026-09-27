@@ -1,0 +1,87 @@
+﻿{% extends "base.html" %}
+{% block title %}Dashboard — WeightCoachAI{% endblock %}
+{% block content %}
+<div class="container">
+    <div style="padding-top:32px;">
+        <h2 class="mt-0">Hi {{ user.username }}</h2>
+        <p class="text-soft">Here's where things stand.</p>
+    </div>
+
+    <div class="dash-stat-row">
+        <div class="stat-box">
+            <div class="num">{{ calorie_target|default:"—" }}</div>
+            <div class="label">Daily calorie target</div>
+        </div>
+        <div class="stat-box">
+            <div class="num">{{ weight_history.0.weight_kg|default:"—" }}</div>
+            <div class="label">Latest logged weight (kg)</div>
+        </div>
+        <div class="stat-box">
+            <div class="num">{{ recent_meals|length }}</div>
+            <div class="label">Recent meals logged</div>
+        </div>
+    </div>
+
+    <div class="quick-actions">
+        <a href="{% url 'logging_app:log_meal_photo' %}" class="btn btn-primary">Log meal (photo)</a>
+        <a href="{% url 'logging_app:log_meal_text' %}" class="btn btn-secondary">Log meal (text)</a>
+        <a href="{% url 'logging_app:log_weight' %}" class="btn btn-secondary">Log weight</a>
+        <a href="{% url 'logging_app:daily_checkin' %}" class="btn btn-secondary">Daily check-in</a>
+        <a href="{% url 'agent:trigger' %}" class="btn btn-secondary">Run weekly review</a>
+    </div>
+
+    <div class="dash-grid">
+        <div>
+            <div class="surface">
+                <h3 class="mt-0">Recent meals</h3>
+                {% for meal in recent_meals %}
+                    <div class="meal-item">
+                        <span>{{ meal.input_type|title }} — {{ meal.logged_at|date:"M d, H:i" }}</span>
+                        <span class="cal">{{ meal.estimated_calories|default:"—" }} kcal</span>
+                    </div>
+                {% empty %}
+                    <p class="text-soft">No meals logged yet. <a href="{% url 'logging_app:log_meal_photo' %}">Log your first one</a>.</p>
+                {% endfor %}
+            </div>
+
+            {% if latest_decision %}
+            <div class="surface">
+                <h3 class="mt-0">Latest agent decision</h3>
+                <p><strong>{{ latest_decision.get_decision_type_display }}</strong> — {{ latest_decision.created_at|date:"M d, Y" }}</p>
+                <p class="text-soft">{{ latest_decision.reasoning_text }}</p>
+                <a href="{% url 'agent:decision_history' %}">View full history →</a>
+                <details class="tech-disclosure">
+                    <summary>How this decision was made</summary>
+                    <div class="tech-disclosure-body">
+                        <span class="tech-tag">rule-based logic</span>
+                        <span class="tech-tag">gemini-3.5-flash explanation</span>
+                        <p style="margin-top:10px;">Decision type is computed deterministically from your weight trend and adherence data. The explanation text above may be LLM-generated, cached, or a fixed template, depending on how nuanced the decision was — see the usage panel for what actually happened.</p>
+                    </div>
+                </details>
+            </div>
+            {% endif %}
+        </div>
+
+        <div>
+            <div class="surface">
+                <h3 class="mt-0">Recent check-ins</h3>
+                {% for c in recent_checkins %}
+                    <div class="meal-item">
+                        <span>{{ c.date|date:"M d" }} — {{ c.get_mood_display|default:"—" }}</span>
+                        <span class="cal">{{ c.adherence_score|default:"—" }}/5</span>
+                    </div>
+                {% empty %}
+                    <p class="text-soft">No check-ins yet.</p>
+                {% endfor %}
+            </div>
+
+            <div class="surface usage-box">
+                <h3 class="mt-0" style="font-size:1.05rem;">API usage (this project)</h3>
+                <p><span class="num">{{ total_tokens_used }}</span> tokens consumed across <span class="num">{{ total_api_calls }}</span> real API calls.</p>
+                <p><span class="num">{{ calls_saved_by_caching }}</span> requests answered without calling the API (cached or hardcoded).</p>
+                <p style="font-size:0.78rem;">Note: Gemini's API does not expose a live "quota remaining" figure — this is usage we track ourselves.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

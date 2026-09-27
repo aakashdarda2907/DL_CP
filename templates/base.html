@@ -1,0 +1,48 @@
+﻿{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}WeightCoachAI{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+
+    <nav class="nav">
+        <div class="nav-inner">
+            <a href="{% if user.is_authenticated %}{% url 'dashboard:home' %}{% else %}{% url 'accounts:landing' %}{% endif %}" class="nav-logo">Weight<span>Coach</span>AI</a>
+            <div class="nav-links">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'dashboard:home' %}">Dashboard</a>
+                    <a href="{% url 'coach:chat' %}">Coach</a>
+                    <a href="{% url 'logging_app:meal_history' %}">History</a>
+                    <a href="{% url 'accounts:profile' %}">Profile</a>
+                    <a href="{% url 'accounts:logout' %}">Log out</a>
+                {% else %}
+                    <a href="{% url 'accounts:login' %}">Log in</a>
+                    <a href="{% url 'accounts:signup' %}" class="btn btn-primary">Get started</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="message {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        WeightCoachAI — an academic project combining ViT, BERT, Gemini and agentic planning.
+    </footer>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

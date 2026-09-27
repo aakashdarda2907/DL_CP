@@ -1,0 +1,22 @@
+﻿{% extends "auth_base.html" %}
+{% block title %}Log in — WeightCoachAI{% endblock %}
+{% block content %}
+<div class="auth-wrap">
+    <div class="surface">
+        <h2 class="mt-0">Welcome back</h2>
+        <form method="POST">
+            {% csrf_token %}
+            <div class="field"><label>Username</label><input type="text" name="username" value="{{ form_data.username|default:'' }}" required autofocus></div>
+            <div class="field">
+                <label>Password</label>
+                <div class="password-wrap">
+                    <input type="password" name="password" id="login-password" required>
+                    <button type="button" class="password-toggle" data-target="login-password">Show</button>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Log in</button>
+        </form>
+        <div class="auth-switch">New here? <a href="{% url 'accounts:signup' %}">Create an account</a></div>
+    </div>
+</div>
+{% endblock %}

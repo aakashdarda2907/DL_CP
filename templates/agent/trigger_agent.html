@@ -1,0 +1,14 @@
+﻿{% extends "base.html" %}
+{% block title %}Weekly review{% endblock %}
+{% block content %}
+<div class="container" style="max-width:560px; padding:40px 24px 60px;">
+    <h2>Run your weekly review</h2>
+    <p class="text-soft">The agent will look at your recent weight trend and adherence, then decide whether to adjust your calorie target.</p>
+    <div class="surface">
+        <form method="POST" class="js-loading" data-loading-text="Reviewing your progress and generating an explanation...">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary btn-block">Run review now</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

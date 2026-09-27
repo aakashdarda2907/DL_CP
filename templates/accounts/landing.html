@@ -1,0 +1,93 @@
+﻿{% extends "base.html" %}
+{% block title %}WeightCoachAI — An AI coach that actually understands your progress{% endblock %}
+{% block content %}
+<div class="container">
+
+    <section class="hero">
+        <div>
+            <h1>Weight management shouldn't feel like guesswork.</h1>
+            <p>Log a meal by photo or by typing what you ate. Get a calorie target that adjusts itself weekly, based on what's actually happening with your body — not a fixed number that ignores you.</p>
+            <a href="{% url 'accounts:signup' %}" class="btn btn-primary">Create your plan</a>
+        </div>
+        <div class="hero-visual">
+            <div class="hero-flow">
+                <div class="hero-flow-step">
+                    <div class="hero-flow-icon">01</div>
+                    <div class="hero-flow-text"><strong>You log a meal</strong><span>Photo or a sentence like "2 rotis and dal"</span></div>
+                </div>
+                <div class="hero-flow-step">
+                    <div class="hero-flow-icon">02</div>
+                    <div class="hero-flow-text"><strong>Models read it</strong><span>A fine-tuned vision model or a language model extracts what you ate</span></div>
+                </div>
+                <div class="hero-flow-step">
+                    <div class="hero-flow-icon">03</div>
+                    <div class="hero-flow-text"><strong>The agent adjusts</strong><span>Your weekly calorie target updates based on real trends</span></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="features">
+        <div class="feature-row">
+            <div><h3>Photo meal logging</h3><p class="text-soft">Snap a photo, get calories and macros back instantly.</p></div>
+            <div>
+                <p>No manual entry. Take a picture of your plate and the system identifies the food and estimates nutrition automatically.</p>
+                <details class="tech-disclosure">
+                    <summary>How this works</summary>
+                    <div class="tech-disclosure-body">
+                        <span class="tech-tag">clip-vit-base-patch32</span>
+                        <span class="tech-tag">linear probing</span>
+                        <p style="margin-top:10px;">We use OpenAI's CLIP Vision Transformer as a frozen feature extractor, and fine-tuned a linear classification head on top of it using supervised learning on a 10-class food dataset (500 images, 80/20 train-val split). Training the full ViT was not feasible on limited hardware, so only the small linear head was trained via backpropagation — a standard transfer-learning technique. Validation accuracy reached ~90%. For foods outside these 10 trained classes, we fall back to CLIP's zero-shot classification against a wider food list.</p>
+                    </div>
+                </details>
+            </div>
+        </div>
+
+        <div class="feature-row">
+            <div><h3>Text meal logging</h3><p class="text-soft">Describe your meal in plain language.</p></div>
+            <div>
+                <p>Type something like "2 rotis and dal, felt tired" and the system extracts individual food items and quantities.</p>
+                <details class="tech-disclosure">
+                    <summary>How this works</summary>
+                    <div class="tech-disclosure-body">
+                        <span class="tech-tag">all-MiniLM-L6-v2</span>
+                        <span class="tech-tag">BERT-family sentence embeddings</span>
+                        <p style="margin-top:10px;">We use a pretrained BERT-family sentence-transformer to embed your text and compare it semantically against known food names, rather than exact keyword matching. This is zero-shot — no fine-tuning was applied to this component, which we note transparently since it differs from the vision model above.</p>
+                    </div>
+                </details>
+            </div>
+        </div>
+
+        <div class="feature-row">
+            <div><h3>Conversational coach</h3><p class="text-soft">Ask questions, grounded in real facts.</p></div>
+            <div>
+                <p>Chat with a coach that answers from a curated knowledge base rather than making things up.</p>
+                <details class="tech-disclosure">
+                    <summary>How this works</summary>
+                    <div class="tech-disclosure-body">
+                        <span class="tech-tag">gemini-3.5-flash</span>
+                        <span class="tech-tag">RAG</span>
+                        <p style="margin-top:10px;">Every question is matched against a small curated set of nutrition/fitness facts using semantic search, and only the most relevant facts are passed to Gemini as grounding context — this is Retrieval-Augmented Generation. Common factual questions are answered instantly from a hardcoded lookup with no API call at all, and repeated questions are served from a cache, to reduce cost and avoid unnecessary generation.</p>
+                    </div>
+                </details>
+            </div>
+        </div>
+
+        <div class="feature-row">
+            <div><h3>Adaptive planning agent</h3><p class="text-soft">Your plan updates itself, and explains why.</p></div>
+            <div>
+                <p>Every week, an agent reviews your weight trend and adherence, decides whether to adjust your calorie target, and explains the decision in plain language.</p>
+                <details class="tech-disclosure">
+                    <summary>How this works</summary>
+                    <div class="tech-disclosure-body">
+                        <span class="tech-tag">rule-based decision logic</span>
+                        <span class="tech-tag">gemini-3.5-flash for explanation only</span>
+                        <p style="margin-top:10px;">The decision itself (increase, decrease, maintain, or flag for human review) is deterministic rule-based logic over your weight trend and adherence — this keeps the core behavior debuggable and predictable. An LLM is used only to translate that decision into a warm, plain-language explanation, and only when the decision is non-trivial; simple "maintain" outcomes use a fixed template instead, avoiding an unnecessary API call.</p>
+                    </div>
+                </details>
+            </div>
+        </div>
+    </section>
+
+</div>
+{% endblock %}

@@ -1,0 +1,26 @@
+﻿{% extends "base.html" %}
+{% block title %}Log meal — Text{% endblock %}
+{% block content %}
+<div class="container" style="max-width:560px; padding:40px 24px 60px;">
+    <h2>Log a meal by text</h2>
+    <p class="text-soft">Describe what you ate, in your own words.</p>
+    <div class="surface">
+        <form method="POST" class="js-loading" data-loading-text="Parsing your meal description...">
+            {% csrf_token %}
+            <div class="field">
+                <label>What did you eat?</label>
+                <textarea name="meal_text" placeholder="e.g. 2 rotis and dal, felt tired afterward" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Analyze meal</button>
+        </form>
+        <details class="tech-disclosure">
+            <summary>How this works</summary>
+            <div class="tech-disclosure-body">
+                <span class="tech-tag">all-MiniLM-L6-v2</span>
+                <span class="tech-tag">semantic similarity, zero-shot</span>
+                <p style="margin-top:10px;">Your text is split into phrases and each is compared, via BERT-family sentence embeddings, against a list of known foods. The closest semantic match above a similarity threshold is used; otherwise a default estimate is applied.</p>
+            </div>
+        </details>
+    </div>
+</div>
+{% endblock %}

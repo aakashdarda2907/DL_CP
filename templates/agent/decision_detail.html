@@ -1,0 +1,68 @@
+﻿{% extends "base.html" %}
+{% block title %}Decision detail{% endblock %}
+{% block content %}
+<div class="container" style="max-width:640px; padding:40px 24px 60px;">
+
+    <span class="decision-badge {% if decision.decision_type == 'maintain_calories' %}maintain{% elif decision.decision_type == 'increase_calories' %}increase{% elif decision.decision_type == 'decrease_calories' %}decrease{% else %}flag{% endif %}">
+        {{ decision.get_decision_type_display }}
+    </span>
+    <h2 class="mt-0">{{ decision.get_decision_type_display }}</h2>
+    <p class="text-soft">{{ decision.created_at|date:"M d, Y H:i" }}</p>
+
+    <div class="surface">
+        <div class="obs-grid">
+            <div class="obs-card">
+                <div class="obs-label">Previous target</div>
+                <div class="obs-value neutral">{{ decision.previous_calorie_target }} <span style="font-size:0.85rem; color:var(--ink-soft);">kcal</span></div>
+            </div>
+            <div class="obs-card">
+                <div class="obs-label">New target</div>
+                <div class="obs-value {% if decision.new_calorie_target > decision.previous_calorie_target %}positive{% elif decision.new_calorie_target < decision.previous_calorie_target %}negative{% else %}neutral{% endif %}">
+                    {{ decision.new_calorie_target }} <span style="font-size:0.85rem; color:var(--ink-soft);">kcal</span>
+                </div>
+            </div>
+        </div>
+
+        <hr class="divider">
+
+        <h3>Why this decision</h3>
+        <ul class="bullet-list">
+            {% for line in decision.reasoning_text.splitlines %}
+                {% if line %}
+                    <li>{{ line|slice:"2:" }}</li>
+                {% endif %}
+            {% endfor %}
+        </ul>
+
+        <hr class="divider">
+
+        <h3>What the agent observed</h3>
+        <div class="obs-grid">
+            <div class="obs-card">
+                <div class="obs-label">Weight trend (2 weeks)</div>
+                <div class="obs-value {% if decision.observed_data.weight_trend_kg > 0 %}positive{% elif decision.observed_data.weight_trend_kg < 0 %}negative{% else %}neutral{% endif %}">
+                    <span class="trend-arrow">{% if decision.observed_data.weight_trend_kg > 0 %}↑{% elif decision.observed_data.weight_trend_kg < 0 %}↓{% else %}→{% endif %}</span>
+                    {{ decision.observed_data.weight_trend_kg|floatformat:1|default:"—" }} kg
+                </div>
+            </div>
+            <div class="obs-card">
+                <div class="obs-label">Estimated daily need (TDEE)</div>
+                <div class="obs-value neutral">{{ decision.observed_data.estimated_tdee|default:"—" }} kcal</div>
+            </div>
+            <div class="obs-card">
+                <div class="obs-label">Average adherence</div>
+                <div class="obs-value neutral">{{ decision.observed_data.avg_adherence|floatformat:1|default:"—" }} / 5</div>
+                {% if decision.observed_data.avg_adherence %}
+                <div class="progress-track"><div class="progress-fill" style="width: {% widthratio decision.observed_data.avg_adherence 5 100 %}%;"></div></div>
+                {% endif %}
+            </div>
+            <div class="obs-card">
+                <div class="obs-label">Data points logged</div>
+                <div class="obs-value neutral">{{ decision.observed_data.num_weight_entries|default:"0" }} weights, {{ decision.observed_data.num_checkins|default:"0" }} check-ins</div>
+            </div>
+        </div>
+    </div>
+
+    <a href="{% url 'agent:decision_history' %}" class="btn btn-secondary" style="margin-top:16px;">← Back to history</a>
+</div>
+{% endblock %}

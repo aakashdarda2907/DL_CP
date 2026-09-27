@@ -1,0 +1,15 @@
+﻿{% extends "base.html" %}
+{% block title %}Log weight{% endblock %}
+{% block content %}
+<div class="container" style="max-width:460px; padding:40px 24px 60px;">
+    <h2>Log your weight</h2>
+    <div class="surface">
+        <form method="POST">
+            {% csrf_token %}
+            <div class="field"><label>Weight (kg)</label><input type="number" step="0.1" name="weight_kg" required></div>
+            <div class="field"><label>Note (optional)</label><input type="text" name="note" placeholder="e.g. after workout"></div>
+            <button type="submit" class="btn btn-primary btn-block">Save</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

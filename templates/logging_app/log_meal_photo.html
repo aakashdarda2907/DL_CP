@@ -1,0 +1,26 @@
+﻿{% extends "base.html" %}
+{% block title %}Log meal — Photo{% endblock %}
+{% block content %}
+<div class="container" style="max-width:560px; padding:40px 24px 60px;">
+    <h2>Log a meal by photo</h2>
+    <p class="text-soft">Take or upload a photo of your plate.</p>
+    <div class="surface">
+        <form method="POST" enctype="multipart/form-data" class="js-loading" data-loading-text="Running the food image through our fine-tuned vision model...">
+            {% csrf_token %}
+            <div class="field">
+                <label>Meal photo</label>
+                <input type="file" name="meal_image" accept="image/*" required>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Analyze meal</button>
+        </form>
+        <details class="tech-disclosure">
+            <summary>How this works</summary>
+            <div class="tech-disclosure-body">
+                <span class="tech-tag">clip-vit-base-patch32</span>
+                <span class="tech-tag">fine-tuned linear head, ~90% val accuracy</span>
+                <p style="margin-top:10px;">Your image is passed through a frozen CLIP Vision Transformer, then through a linear classification head we fine-tuned on 10 food classes. If confidence is low, the system falls back to CLIP's broader zero-shot matching.</p>
+            </div>
+        </details>
+    </div>
+</div>
+{% endblock %}

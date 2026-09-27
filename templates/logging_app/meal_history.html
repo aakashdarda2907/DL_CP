@@ -1,0 +1,17 @@
+﻿{% extends "base.html" %}
+{% block title %}Meal history{% endblock %}
+{% block content %}
+<div class="container" style="padding:40px 24px 60px;">
+    <h2>Meal history</h2>
+    <div class="surface">
+        {% for meal in meals %}
+            <div class="meal-item">
+                <span>{{ meal.input_type|title }} — {{ meal.logged_at|date:"M d, Y H:i" }}{% if meal.is_corrected %} (corrected){% endif %}</span>
+                <span class="cal">{{ meal.estimated_calories|floatformat:0 }} kcal</span>
+            </div>
+        {% empty %}
+            <p class="text-soft">No meals logged yet.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

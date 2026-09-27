@@ -1,0 +1,39 @@
+﻿{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}WeightCoachAI{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+
+    <div class="auth-header">
+        <a href="{% url 'accounts:landing' %}" class="nav-logo">Weight<span>Coach</span>AI</a>
+    </div>
+
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="message {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <script>
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('password-toggle')) {
+            const input = document.getElementById(e.target.dataset.target);
+            if (input.type === 'password') { input.type = 'text'; e.target.textContent = 'Hide'; }
+            else { input.type = 'password'; e.target.textContent = 'Show'; }
+        }
+    });
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

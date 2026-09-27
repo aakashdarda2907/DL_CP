@@ -1,0 +1,71 @@
+﻿{% extends "auth_base.html" %}
+{% block title %}Sign up — WeightCoachAI{% endblock %}
+{% block content %}
+<div class="auth-wrap">
+    <div class="surface">
+        <h2 class="mt-0">Create your account</h2>
+        <p class="text-soft">Takes about a minute.</p>
+        <form method="POST">
+            {% csrf_token %}
+            <div class="field-row">
+                <div class="field"><label>Username</label><input type="text" name="username" value="{{ form_data.username|default:'' }}" required></div>
+                <div class="field"><label>Email</label><input type="email" name="email" value="{{ form_data.email|default:'' }}" required></div>
+            </div>
+            <div class="field-row">
+                <div class="field">
+                    <label>Password</label>
+                    <div class="password-wrap">
+                        <input type="password" name="password" id="signup-password" required>
+                        <button type="button" class="password-toggle" data-target="signup-password">Show</button>
+                    </div>
+                </div>
+                <div class="field">
+                    <label>Confirm password</label>
+                    <div class="password-wrap">
+                        <input type="password" name="confirm_password" id="signup-confirm" required>
+                        <button type="button" class="password-toggle" data-target="signup-confirm">Show</button>
+                    </div>
+                </div>
+            </div>
+            <hr class="divider">
+            <div class="field-row">
+                <div class="field"><label>Height (cm)</label><input type="number" step="0.1" name="height_cm" value="{{ form_data.height_cm|default:'' }}"></div>
+                <div class="field"><label>Age</label><input type="number" name="age" value="{{ form_data.age|default:'' }}"></div>
+            </div>
+            <div class="field-row">
+                <div class="field"><label>Current weight (kg)</label><input type="number" step="0.1" name="current_weight_kg" value="{{ form_data.current_weight_kg|default:'' }}"></div>
+                <div class="field"><label>Target weight (kg)</label><input type="number" step="0.1" name="target_weight_kg" value="{{ form_data.target_weight_kg|default:'' }}"></div>
+            </div>
+            <div class="field-row">
+                <div class="field">
+                    <label>Gender</label>
+                    <select name="gender">
+                        <option value="male" {% if form_data.gender == 'male' %}selected{% endif %}>Male</option>
+                        <option value="female" {% if form_data.gender == 'female' %}selected{% endif %}>Female</option>
+                        <option value="other" {% if form_data.gender == 'other' %}selected{% endif %}>Other</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Goal</label>
+                    <select name="goal">
+                        <option value="lose" {% if form_data.goal == 'lose' %}selected{% endif %}>Lose weight</option>
+                        <option value="gain" {% if form_data.goal == 'gain' %}selected{% endif %}>Gain weight</option>
+                        <option value="maintain" {% if form_data.goal == 'maintain' or not form_data.goal %}selected{% endif %}>Maintain weight</option>
+                    </select>
+                </div>
+            </div>
+            <div class="field">
+                <label>Activity level</label>
+                <select name="activity_level">
+                    <option value="sedentary" {% if form_data.activity_level == 'sedentary' or not form_data.activity_level %}selected{% endif %}>Sedentary</option>
+                    <option value="light" {% if form_data.activity_level == 'light' %}selected{% endif %}>Lightly active</option>
+                    <option value="moderate" {% if form_data.activity_level == 'moderate' %}selected{% endif %}>Moderately active</option>
+                    <option value="active" {% if form_data.activity_level == 'active' %}selected{% endif %}>Very active</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Create account</button>
+        </form>
+        <div class="auth-switch">Already have an account? <a href="{% url 'accounts:login' %}">Log in</a></div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,150 @@
+﻿{% extends "base.html" %}
+{% block title %}Coach — WeightCoachAI{% endblock %}
+{% block content %}
+<div class="container" style="max-width:680px; padding:40px 24px 60px;">
+    <h2>Your coach</h2>
+    <p class="text-soft">Grounded in nutrition facts — not free-form guessing.</p>
+
+    <div class="chat-window" id="chat-window">
+        {% if chat_history %}
+            {% for msg in chat_history %}
+                {% if msg.role == 'user' %}
+                    <div class="chat-msg user">{{ msg.message }}</div>
+                {% else %}
+                    <div class="chat-msg coach">
+                        <ul class="bullet-list" style="margin:0;">
+                            {% for line in msg.message.splitlines %}
+                                {% if line %}<li>{{ line|slice:"2:" }}</li>{% endif %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% else %}
+            <div class="chat-msg coach">Hi {{ user.username }}, ask me anything about your plan, plateaus, or nutrition basics.</div>
+        {% endif %}
+    </div>
+
+    <div id="suggestion-pills" class="pill-row"></div>
+
+    <form id="chat-form" class="chat-input-row">
+        {% csrf_token %}
+        <input type="text" id="chat-input" placeholder="Type a message..." autocomplete="off" required>
+        <button type="submit" class="btn btn-primary">Send</button>
+    </form>
+
+    <details class="tech-disclosure" style="margin-top:20px;">
+        <summary>How this works</summary>
+        <div class="tech-disclosure-body">
+            <span class="tech-tag">gemini-3.5-flash</span>
+            <span class="tech-tag">structured JSON output</span>
+            <span class="tech-tag">RAG</span>
+            <span class="tech-tag">conversation memory (last 6 turns)</span>
+            <p style="margin-top:10px;">Responses use Gemini's structured output mode to reliably return bullet points plus follow-up suggestions, rather than parsing free-form text. Recent conversation history is included in every call so the coach maintains context.</p>
+        </div>
+    </details>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const form = document.getElementById('chat-form');
+const input = document.getElementById('chat-input');
+const chatWindow = document.getElementById('chat-window');
+const pillRow = document.getElementById('suggestion-pills');
+chatWindow.scrollTop = chatWindow.scrollHeight;
+
+const starterSuggestions = {{ starter_suggestions|safe|default:"[]" }};
+renderPills(starterSuggestions);
+
+function addUserMessage(text) {
+    const div = document.createElement('div');
+    div.className = 'chat-msg user';
+    div.textContent = text;
+    chatWindow.appendChild(div);
+    chatWindow.scrollTop = chatWindow.scrollHeight;
+}
+
+function addCoachMessage(points) {
+    const div = document.createElement('div');
+    div.className = 'chat-msg coach';
+    const ul = document.createElement('ul');
+    ul.className = 'bullet-list';
+    ul.style.margin = '0';
+    points.forEach(function(point) {
+        const li = document.createElement('li');
+        li.textContent = point;
+        ul.appendChild(li);
+    });
+    div.appendChild(ul);
+    chatWindow.appendChild(div);
+    chatWindow.scrollTop = chatWindow.scrollHeight;
+}
+
+function addTypingIndicator() {
+    const div = document.createElement('div');
+    div.className = 'chat-msg coach typing';
+    div.id = 'typing-indicator';
+    div.innerHTML = '<span></span><span></span><span></span>';
+    chatWindow.appendChild(div);
+    chatWindow.scrollTop = chatWindow.scrollHeight;
+}
+
+function removeTypingIndicator() {
+    const el = document.getElementById('typing-indicator');
+    if (el) el.remove();
+}
+
+function renderPills(questions) {
+    pillRow.innerHTML = '';
+    questions.forEach(function(q) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'pill';
+        btn.textContent = q;
+        btn.addEventListener('click', function() {
+            sendMessage(q);
+        });
+        pillRow.appendChild(btn);
+    });
+}
+
+async function sendMessage(message) {
+    addUserMessage(message);
+    pillRow.innerHTML = '';
+    addTypingIndicator();
+
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    const formData = new FormData();
+    formData.append('message', message);
+
+    try {
+        const response = await fetch("{% url 'coach:chat_api' %}", {
+            method: 'POST',
+            headers: { 'X-CSRFToken': csrfToken },
+            body: formData
+        });
+        const data = await response.json();
+        removeTypingIndicator();
+
+        if (data.answer_points) {
+            addCoachMessage(data.answer_points);
+            renderPills(data.follow_up_questions || []);
+        } else {
+            addCoachMessage([data.error || 'Something went wrong.']);
+        }
+    } catch (err) {
+        removeTypingIndicator();
+        addCoachMessage(['Could not reach the coach right now.']);
+    }
+}
+
+form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    const message = input.value.trim();
+    if (!message) return;
+    input.value = '';
+    sendMessage(message);
+});
+</script>
+{% endblock %}

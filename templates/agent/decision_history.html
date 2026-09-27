@@ -1,0 +1,20 @@
+﻿{% extends "base.html" %}
+{% block title %}Decision history{% endblock %}
+{% block content %}
+<div class="container" style="padding:40px 24px 60px;">
+    <h2>Decision history</h2>
+    <div class="surface">
+        {% for d in decisions %}
+            <div class="meal-item">
+                <span>
+                    <span class="decision-badge {% if d.decision_type == 'maintain_calories' %}maintain{% elif d.decision_type == 'increase_calories' %}increase{% elif d.decision_type == 'decrease_calories' %}decrease{% else %}flag{% endif %}" style="margin-bottom:0; margin-right:10px;">{{ d.get_decision_type_display }}</span>
+                    <a href="{% url 'agent:decision_detail' d.id %}">{{ d.created_at|date:"M d, Y" }}</a>
+                </span>
+                <span class="cal">{{ d.previous_calorie_target }} → {{ d.new_calorie_target }}</span>
+            </div>
+        {% empty %}
+            <p class="text-soft">No decisions yet. <a href="{% url 'agent:trigger' %}">Run your first review</a>.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

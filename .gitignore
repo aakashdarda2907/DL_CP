@@ -1,0 +1,10 @@
+﻿venv/
+__pycache__/
+*.pyc
+.env
+db.sqlite3
+media/
+staticfiles/
+ml_layer/vit_module/data/
+patch_fix*.py
+patch_planner_bullets.ps1

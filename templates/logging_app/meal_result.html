@@ -1,0 +1,48 @@
+﻿{% extends "base.html" %}
+{% block title %}Meal logged{% endblock %}
+{% block content %}
+<div class="container" style="max-width:560px; padding:40px 24px 60px;">
+    <h2>Here's what we found</h2>
+
+    {% if meal.image %}
+        <img src="{{ meal.image.url }}" alt="Meal photo" style="width:100%; border-radius:6px; border:1px solid var(--line); margin-bottom:20px;">
+    {% endif %}
+
+    <div class="surface">
+        <h3 class="mt-0">Predicted items</h3>
+        {% for item_name, item_data in meal.predicted_items.items %}
+            <div class="meal-item">
+                <span>{{ item_name|title }} × {{ item_data.servings }}</span>
+                <span class="cal">{{ item_data.confidence|floatformat:2 }} confidence</span>
+            </div>
+        {% endfor %}
+        <hr class="divider">
+        <div class="dash-stat-row" style="grid-template-columns: repeat(4,1fr);">
+            <div class="stat-box"><div class="num">{{ meal.estimated_calories|floatformat:0 }}</div><div class="label">kcal</div></div>
+            <div class="stat-box"><div class="num">{{ meal.estimated_protein_g|floatformat:0 }}</div><div class="label">protein (g)</div></div>
+            <div class="stat-box"><div class="num">{{ meal.estimated_carbs_g|floatformat:0 }}</div><div class="label">carbs (g)</div></div>
+            <div class="stat-box"><div class="num">{{ meal.estimated_fats_g|floatformat:0 }}</div><div class="label">fats (g)</div></div>
+        </div>
+    </div>
+
+    <div class="surface">
+        <h3 class="mt-0">Not quite right?</h3>
+        <p class="text-soft">Correct any values below — this data helps improve the model.</p>
+        <form method="POST">
+            {% csrf_token %}
+            <div class="field-row">
+                <div class="field"><label>Calories</label><input type="number" step="0.1" name="estimated_calories" value="{{ meal.estimated_calories }}"></div>
+                <div class="field"><label>Protein (g)</label><input type="number" step="0.1" name="estimated_protein_g" value="{{ meal.estimated_protein_g }}"></div>
+            </div>
+            <div class="field-row">
+                <div class="field"><label>Carbs (g)</label><input type="number" step="0.1" name="estimated_carbs_g" value="{{ meal.estimated_carbs_g }}"></div>
+                <div class="field"><label>Fats (g)</label><input type="number" step="0.1" name="estimated_fats_g" value="{{ meal.estimated_fats_g }}"></div>
+            </div>
+            <div class="field"><label>Notes (optional)</label><textarea name="correction_notes" placeholder="e.g. this was actually 2 servings"></textarea></div>
+            <button type="submit" class="btn btn-secondary">Save correction</button>
+        </form>
+    </div>
+
+    <a href="{% url 'dashboard:home' %}" class="btn btn-primary btn-block" style="margin-top:16px;">Back to dashboard</a>
+</div>
+{% endblock %}
