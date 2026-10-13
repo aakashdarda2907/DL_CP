@@ -26,13 +26,19 @@
         <hr class="divider">
 
         <h3>Why this decision</h3>
-        <ul class="bullet-list">
-            {% for line in decision.reasoning_text.splitlines %}
-                {% if line %}
-                    <li>{{ line|slice:"2:" }}</li>
+<ul class="bullet-list">
+    {% for line in decision.reasoning_text.splitlines %}
+        {% if line %}
+            <li>
+                {% if line|slice:":2" == "- " or line|slice:":2" == "* " %}
+                    {{ line|slice:"2:" }}
+                {% else %}
+                    {{ line }}
                 {% endif %}
-            {% endfor %}
-        </ul>
+            </li>
+        {% endif %}
+    {% endfor %}
+</ul>
 
         <hr class="divider">
 

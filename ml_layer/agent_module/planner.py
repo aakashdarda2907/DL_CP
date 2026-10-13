@@ -1,23 +1,17 @@
-﻿"""
-The agent: observes recent user data, applies rule-based logic to decide
-whether to adjust the calorie target. Gemini is used ONLY for the
-human-readable explanation - and only when the decision is nuanced enough
-to need it. Simple "maintain" decisions use a hardcoded template instead,
-which cuts a meaningful share of API calls since "maintain" is the most
-common outcome week to week.
-"""
-
-from google import genai
+﻿from google import genai
+from google.genai import types
 from django.conf import settings
 from django.utils import timezone
 from datetime import timedelta
 
 from logging_app.models import WeightEntry, DailyCheckIn
 from agent.models import AgentDecision
-from ml_layer.gpt_module.usage_tracker import make_cache_key, get_cached_or_none, set_cache, record_usage
+from ml_layer.gpt_module.usage_tracker import record_usage
+
+# Import your tools
+from .tools import adjust_macros, flag_for_review, suggest_recipe
 
 _client = None
-
 
 def _get_client():
     global _client
@@ -25,42 +19,19 @@ def _get_client():
         _client = genai.Client(api_key=settings.GEMINI_API_KEY)
     return _client
 
-
-def _estimate_tdee(user):
-    weight = user.current_weight_kg or 70
-    height = user.height_cm or 170
-    age = user.age or 25
-
-    if user.gender == "female":
-        bmr = 10 * weight + 6.25 * height - 5 * age - 161
-    else:
-        bmr = 10 * weight + 6.25 * height - 5 * age + 5
-
-    activity_multipliers = {
-        "sedentary": 1.2, "light": 1.375, "moderate": 1.55, "active": 1.725,
-    }
-    multiplier = activity_multipliers.get(user.activity_level, 1.2)
-    return bmr * multiplier
-
-
-def _hardcoded_maintain_explanation(user, previous_target):
-    return (
-        f"- Your progress over the past two weeks looks on track for your {user.goal} goal.\n"
-        f"- We are keeping your calorie target at {previous_target} kcal/day.\n"
-        "- Keep logging consistently so we can catch any needed adjustments early."
-    )
-
-
 def run_weekly_agent(user):
-    two_weeks_ago = timezone.now() - timedelta(days=14)
-    one_week_ago = timezone.now() - timedelta(days=7)
+    # Anchor the date window to the user's latest data
+    latest_checkin = DailyCheckIn.objects.filter(user=user).order_by('-date').first()
+    anchor_date = latest_checkin.date if latest_checkin else timezone.now().date()
 
-    recent_weights = list(WeightEntry.objects.filter(user=user, recorded_at__gte=two_weeks_ago).order_by("recorded_at"))
-    recent_checkins = list(DailyCheckIn.objects.filter(user=user, date__gte=one_week_ago))
+    two_weeks_ago_date = anchor_date - timedelta(days=14)
+    one_week_ago_date = anchor_date - timedelta(days=7)
 
-    tdee = _estimate_tdee(user)
-    previous_target = user.current_calorie_target or round(tdee)
+    recent_checkins = list(DailyCheckIn.objects.filter(user=user, date__gte=one_week_ago_date))
+    recent_weights = list(WeightEntry.objects.filter(user=user, recorded_at__date__gte=two_weeks_ago_date).order_by("recorded_at"))
 
+    previous_target = user.current_calorie_target or 2000
+    
     weight_trend = None
     if len(recent_weights) >= 2:
         weight_trend = recent_weights[-1].weight_kg - recent_weights[0].weight_kg
@@ -70,70 +41,105 @@ def run_weekly_agent(user):
         scores = [c.adherence_score for c in recent_checkins if c.adherence_score is not None]
         avg_adherence = sum(scores) / len(scores) if scores else None
 
-    decision_type = "maintain_calories"
-    new_target = previous_target
-
-    if weight_trend is not None:
-        if user.goal == "lose" and weight_trend > -0.2:
-            decision_type = "decrease_calories"
-            new_target = round(previous_target * 0.9)
-        elif user.goal == "gain" and weight_trend < 0.2:
-            decision_type = "increase_calories"
-            new_target = round(previous_target * 1.1)
-        elif user.goal == "lose" and weight_trend < -1.5:
-            decision_type = "increase_calories"
-            new_target = round(previous_target * 1.05)
-
-    if avg_adherence is not None and avg_adherence <= 2:
-        decision_type = "flag_for_review"
-
     observed_data = {
+        "goal": user.goal,
+        "current_weight_kg": user.current_weight_kg,
         "weight_trend_kg": weight_trend,
         "avg_adherence": avg_adherence,
-        "estimated_tdee": round(tdee),
         "num_weight_entries": len(recent_weights),
         "num_checkins": len(recent_checkins),
     }
 
-    # Hardcoded shortcut: "maintain" decisions don't need LLM nuance - use a template.
-    if decision_type == "maintain_calories":
-        reasoning_text = _hardcoded_maintain_explanation(user, previous_target)
-        record_usage("agent_explanation", response=None, was_hardcoded=True)
-    else:
-        # Cache lookup: similar decisions (same type + rounded targets) reuse an explanation
-        cache_key = make_cache_key(
-            "agent_explanation", decision_type, previous_target, new_target, user.goal,
-            round(weight_trend, 1) if weight_trend is not None else "none",
+    agent_prompt = f"""You are an expert AI weight-management coach.
+    Decide the best action by calling exactly one primary tool (adjust_macros OR flag_for_review).
+
+    User Data:
+    - Goal: {user.goal}
+    - Weight change over last 2 weeks (kg, positive = gained): {weight_trend}
+    - Avg adherence score (0-5): {avg_adherence}
+    - Current calorie target: {previous_target}
+
+    Rules:
+    1. If avg adherence is not None and <= 2.0, call flag_for_review.
+    2. If adherence is above 2.0 and weight change is moving AWAY from the goal
+    (e.g. goal is loss but weight went up, or goal is gain but weight went down),
+    call adjust_macros with 'decrease' or 'increase' (5-10%).
+    3. If progress matches the goal, call adjust_macros with 'maintain' and 0.
+    4. Do NOT call flag_for_review when adherence is above 2.0 unless the data is missing or absurd.
+    5. Optionally also call suggest_recipe when the user is on track.
+    Always fill in the 'reason' argument in plain text with no markdown.
+    """
+
+    client = _get_client()
+    tools_called_log = []
+    
+    new_target = previous_target
+    decision_type = "maintain_calories" 
+    reasoning_text = ""
+
+    try:
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=agent_prompt,
+            config=types.GenerateContentConfig(
+                tools=[adjust_macros, flag_for_review, suggest_recipe],
+                # KEY FIX: stop the SDK from auto-running tools
+                automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True),
+                tool_config=types.ToolConfig(
+                    function_calling_config=types.FunctionCallingConfig(
+                        mode=types.FunctionCallingConfigMode.ANY
+                    )
+                ),
+                temperature=0.0,
+            ),
         )
-        cached = get_cached_or_none(cache_key)
+        record_usage("agent_tool_calling", response=response)
 
-        if cached is not None:
-            reasoning_text = cached
-            record_usage("agent_explanation", response=None, was_cached=True)
+        calls = response.function_calls or []
+        if not calls:
+            decision_type = "flag_for_review"
+            reasoning_text = "Model returned no tool call; flagged as a safe fallback."
+            tools_called_log.append({"error": "No tools called by model."})
         else:
-            client = _get_client()
-            explanation_prompt = f"""You are a weight-management coach assistant. Explain the following
-automated decision to the user as exactly 3 short bullet points, each starting with "- " on its own line.
-Do not invent data beyond what is given. No heading, no intro sentence - just the 3 bullets.
+            flagged = False
+            reasons = []
+            for fc in calls:
+                args = dict(fc.args) if fc.args else {}
+                tools_called_log.append({"tool": fc.name, "args": args})
 
-Decision: {decision_type}
-Previous calorie target: {previous_target}
-New calorie target: {new_target}
-Observed data: {observed_data}
-User goal: {user.goal}
+                if fc.name == "adjust_macros":
+                    result = adjust_macros(
+                        current_calories=previous_target,
+                        adjustment_type=str(args.get("adjustment_type", "maintain")),
+                        percentage_change=float(args.get("percentage_change", 0.0)),
+                        reason=str(args.get("reason", "")),
+                    )
+                    new_target = result["new_calories"]
+                    decision_type = result["decision_type"]
+                    reasons.append(result["reason"])
 
-Bullet points:"""
+                elif fc.name == "flag_for_review":
+                    result = flag_for_review(reason=str(args.get("reason", "Needs review.")))
+                    flagged = True
+                    reasons.append(result["reason"])
 
-            try:
-                response = client.models.generate_content(
-                    model="gemini-3.5-flash",
-                    contents=explanation_prompt,
-                )
-                reasoning_text = response.text
-                record_usage("agent_explanation", response=response)
-                set_cache(cache_key, reasoning_text)
-            except Exception as e:
-                reasoning_text = f"(Explanation unavailable: {str(e)}) Decision was {decision_type} based on recent trends."
+                elif fc.name == "suggest_recipe":
+                    result = suggest_recipe(
+                        goal=str(args.get("goal", user.goal)),
+                        calorie_limit=int(args.get("calorie_limit", previous_target)),
+                    )
+                    reasons.append(result["suggestion"])
+
+            if flagged:
+                decision_type = "flag_for_review"
+                new_target = previous_target  # never change calories on a flag
+            reasoning_text = " ".join(r for r in reasons if r) or "Tool calls executed."
+
+    except Exception as e:
+        decision_type = "flag_for_review"
+        new_target = previous_target
+        reasoning_text = f"Error: {e}"
+        tools_called_log.append({"error": str(e)})
 
     decision = AgentDecision.objects.create(
         user=user,
@@ -142,6 +148,7 @@ Bullet points:"""
         new_calorie_target=new_target,
         observed_data=observed_data,
         reasoning_text=reasoning_text,
+        tools_called=tools_called_log
     )
 
     if decision_type != "flag_for_review":
@@ -149,4 +156,3 @@ Bullet points:"""
         user.save()
 
     return decision
-

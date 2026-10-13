@@ -1,7 +1,6 @@
 from django.db import models
 from django.conf import settings
 
-
 class AgentDecision(models.Model):
     """
     Logs every decision the agent makes — this is what powers the
@@ -17,18 +16,18 @@ class AgentDecision(models.Model):
     ]
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='agent_decisions')
-
     decision_type = models.CharField(max_length=25, choices=DECISION_TYPE_CHOICES)
-
     previous_calorie_target = models.PositiveIntegerField(null=True, blank=True)
     new_calorie_target = models.PositiveIntegerField(null=True, blank=True)
-
-    # The raw signals the agent observed — stored for transparency/debugging
+    
+    # The raw signals the agent observed
     observed_data = models.JSONField(default=dict, blank=True)
+    
+    # NEW: Logs the exact tool calls and arguments Gemini chose
+    tools_called = models.JSONField(default=list, blank=True)
 
-    # Human-readable explanation (LLM-generated) shown to the user
+    # Human-readable explanation
     reasoning_text = models.TextField(blank=True)
-
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
