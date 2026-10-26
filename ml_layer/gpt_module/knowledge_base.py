@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tiny static knowledge base for the RAG-grounded coach.
 Simplification (80/20): a hardcoded list of ~15 nutrition/fitness facts
 instead of a full document corpus + vector database. Embedded once using
@@ -27,8 +27,30 @@ KNOWLEDGE_BASE = [
 
 _kb_embeddings = None
 
+# Similarity threshold chosen empirically from the RAG evaluation dataset.
+# Evaluation showed a clean gap between the minimum in-scope expected fact
+# score (0.3935) and the maximum out-of-scope top-1 score (0.1146).
+# A threshold of 0.35 sits safely above all out-of-scope scores while
+# preserving recall for every in-scope query in the evaluation set.
+# See: ml_layer/gpt_module/baseline_results.json and evaluate_retrieval.py.
+DEFAULT_SIMILARITY_THRESHOLD = 0.35
 
-def get_relevant_context(query, top_k=3):
+
+def get_relevant_context(query, top_k=3, similarity_threshold=DEFAULT_SIMILARITY_THRESHOLD):
+    """Return up to top_k knowledge-base facts most relevant to the query.
+
+    Args:
+        query: User's natural-language question.
+        top_k: Maximum number of facts to return.
+        similarity_threshold: Minimum cosine similarity a fact must reach to
+            be included. Facts below this score are silently dropped, even if
+            they rank in the top-k. Pass ``None`` to disable filtering and
+            restore the original behaviour (returns exactly top_k facts).
+
+    Returns:
+        List of fact strings, ordered by descending similarity.  May be
+        shorter than top_k (or empty) when few facts exceed the threshold.
+    """
     global _kb_embeddings
     from sentence_transformers import util as st_util
 
@@ -41,4 +63,13 @@ def get_relevant_context(query, top_k=3):
     similarities = st_util.cos_sim(query_embedding, _kb_embeddings)[0]
 
     top_indices = similarities.argsort(descending=True)[:top_k]
-    return [KNOWLEDGE_BASE[i] for i in top_indices]
+
+    if similarity_threshold is None:
+        # Backward-compatible: no filtering, return exactly top_k facts.
+        return [KNOWLEDGE_BASE[i] for i in top_indices]
+
+    return [
+        KNOWLEDGE_BASE[i]
+        for i in top_indices
+        if similarities[i].item() >= similarity_threshold
+    ]
