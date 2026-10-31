@@ -1,0 +1,569 @@
+{
+  "summary": {
+    "total_queries": 24,
+    "in_scope_queries": 20,
+    "out_of_scope_queries": 4,
+    "top_k": 3,
+    "min_similarity": null,
+    "mean_precision": 0.3611,
+    "mean_recall": 0.8333,
+    "mean_f1": 0.4917,
+    "hit_rate": 0.8333,
+    "mean_reciprocal_rank": 0.8125,
+    "in_scope_precision": 0.4333,
+    "in_scope_recall": 1.0,
+    "out_of_scope_precision": 0.0
+  },
+  "results": [
+    {
+      "id": "eval_01",
+      "category": "safe_weight_loss",
+      "query": "How fast is it safe to lose weight?",
+      "expected_facts": [
+        "A safe rate of weight loss is about 0.5 to 1 kg per week, achieved through a moderate calorie deficit."
+      ],
+      "retrieved_facts": [
+        "A safe rate of weight loss is about 0.5 to 1 kg per week, achieved through a moderate calorie deficit.",
+        "A calorie deficit of roughly 500 kcal per day typically leads to about 0.5 kg of weight loss per week.",
+        "Extremely low-calorie diets can slow metabolism and are generally not sustainable long-term."
+      ],
+      "metrics": {
+        "retrieved_count": 3,
+        "expected_count": 1,
+        "matched_count": 1,
+        "precision": 0.3333333333333333,
+        "recall": 1.0,
+        "f1": 0.5,
+        "hit": 1.0,
+        "reciprocal_rank": 1.0
+      }
+    },
+    {
+      "id": "eval_02",
+      "category": "calorie_deficit",
+      "query": "How big of a calorie deficit do I need to lose half a kilogram a week?",
+      "expected_facts": [
+        "A calorie deficit of roughly 500 kcal per day typically leads to about 0.5 kg of weight loss per week."
+      ],
+      "retrieved_facts": [
+        "A calorie deficit of roughly 500 kcal per day typically leads to about 0.5 kg of weight loss per week.",
+        "A safe rate of weight loss is about 0.5 to 1 kg per week, achieved through a moderate calorie deficit.",
+        "Protein intake of around 1.6 to 2.2 grams per kg of body weight supports muscle retention during weight loss."
+      ],
+      "metrics": {
+        "retrieved_count": 3,
+        "expected_count": 1,
+        "matched_count": 1,
+        "precision": 0.3333333333333333,
+        "recall": 1.0,
+        "f1": 0.5,
+        "hit": 1.0,
+        "reciprocal_rank": 1.0
+      }
+    },
+    {
+      "id": "eval_03",
+      "category": "protein_intake",
+      "query": "How much protein should I consume each day when trying to lose weight without losing muscle?",
+      "expected_facts": [
+        "Protein intake of around 1.6 to 2.2 grams per kg of body weight supports muscle retention during weight loss."
+      ],
+      "retrieved_facts": [
+        "Protein intake of around 1.6 to 2.2 grams per kg of body weight supports muscle retention during weight loss.",
+        "Weight gain for muscle building typically requires a calorie surplus of 250 to 500 kcal per day.",
+        "A calorie deficit of roughly 500 kcal per day typically leads to about 0.5 kg of weight loss per week."
+      ],
+      "metrics": {
+        "retrieved_count": 3,
+        "expected_count": 1,
+        "matched_count": 1,
+        "precision": 0.3333333333333333,
+        "recall": 1.0,
+        "f1": 0.5,
+        "hit": 1.0,
+        "reciprocal_rank": 1.0
+      }
+    },
+    {
+      "id": "eval_04",
+      "category": "weight_loss_plateau",
+      "query": "Why has my weight loss stopped even though I am still dieting?",
+      "expected_facts": [
+        "Weight loss plateaus are common and often due to metabolic adaptation, water retention, or underestimated calorie intake."
+      ],
+      "retrieved_facts": [
+        "Weight loss plateaus are common and often due to metabolic adaptation, water retention, or underestimated calorie intake.",
+        "Sudden large weight changes on the scale are often water weight, not fat gain or loss.",
+        "Extremely low-calorie diets can slow metabolism and are generally not sustainable long-term."
+      ],
+      "metrics": {
+        "retrieved_count": 3,
+        "expected_count": 1,
+        "matched_count": 1,
+        "precision": 0.3333333333333333,
+        "recall": 1.0,
+        "f1": 0.5,
+        "hit": 1.0,
+        "reciprocal_rank": 1.0
+      }
+    },
+    {
+      "id": "eval_05",
+      "category": "strength_training",
+      "query": "Will lifting weights help me keep my muscle while losing fat?",
+      "expected_facts": [
+        "Strength training combined with a calorie deficit helps preserve muscle mass while losing fat."
+      ],
+      "retrieved_facts": [
+        "Strength training combined with a calorie deficit helps preserve muscle mass while losing fat.",
+        "Protein intake of around 1.6 to 2.2 grams per kg of body weight supports muscle retention during weight loss.",
+        "Muscle weighs more densely than fat, so body composition changes may not always show on the scale."
+      ],
+      "metrics": {
+        "retrieved_count": 3,
+        "expected_count": 1,
+        "matched_count": 1,
+        "precision": 0.3333333333333333,
+        "recall": 1.0,
+        "f1": 0.5,
+        "hit": 1.0,
+        "reciprocal_rank": 1.0
+      }
+    },
+    {
+      "id": "eval_06",
+      "category": "muscle_building",
+      "query": "How many extra calories do I need to eat per day to gain muscle mass?",
+      "expected_facts": [
+        "Weight gain for muscle building typically requires a calorie surplus of 250 to 500 kcal per day."
+      ],
+      "retrieved_facts": [
+        "Weight gain for muscle building typically requires a calorie surplus of 250 to 500 kcal per day.",
+        "Protein intake of around 1.6 to 2.2 grams per kg of body weight supports muscle retention during weight loss.",
+        "Strength training combined with a calorie deficit helps preserve muscle mass while losing fat."
+      ],
+      "metrics": {
+        "retrieved_count": 3,
+        "expected_count": 1,
+        "matched_count": 1,
+        "precision": 0.3333333333333333,
+        "recall": 1.0,
+        "f1": 0.5,
+        "hit": 1.0,
+        "reciprocal_rank": 1.0
+      }
+    },
+    {
+      "id": "eval_07",
+      "category": "sleep_appetite",
+      "query": "Does not getting enough sleep increase my appetite or cravings?",
+      "expected_facts": [
+        "Sleep deprivation can increase hunger hormones and make weight management harder."
+      ],
+      "retrieved_facts": [
+        "Sleep deprivation can increase hunger hormones and make weight management harder.",
+        "Stress and poor sleep can affect weight management independent of diet and exercise.",
+        "Drinking water before meals can help with portion control and satiety."
+      ],
+      "metrics": {
+        "retrieved_count": 3,
+        "expected_count": 1,
+        "matched_count": 1,
+        "precision": 0.3333333333333333,
+        "recall": 1.0,
+        "f1": 0.5,
+        "hit": 1.0,
+        "reciprocal_rank": 1.0
+      }
+    },
+    {
+      "id": "eval_08",
+      "category": "hydration_satiety",
+      "query": "Can drinking water before meals help me eat less and feel full?",
+      "expected_facts": [
+        "Drinking water before meals can help with portion control and satiety."
+      ],
+      "retrieved_facts": [
+        "Drinking water before meals can help with portion control and satiety.",
+        "Fiber-rich foods like vegetables and whole grains promote satiety and support digestive health.",
+        "Sleep deprivation can increase hunger hormones and make weight management harder."
+      ],
+      "metrics": {
+        "retrieved_count": 3,
+        "expected_count": 1,
+        "matched_count": 1,
+        "precision": 0.3333333333333333,
+        "recall": 1.0,
+        "f1": 0.5,
+        "hit": 1.0,
+        "reciprocal_rank": 1.0
+      }
+    },
+    {
+      "id": "eval_09",
+      "category": "diet_sustainability",
+      "query": "Is it safe to go on a very low calorie crash diet?",
+      "expected_facts": [
+        "Extremely low-calorie diets can slow metabolism and are generally not sustainable long-term."
+      ],
+      "retrieved_facts": [
+        "Extremely low-calorie diets can slow metabolism and are generally not sustainable long-term.",
+        "A safe rate of weight loss is about 0.5 to 1 kg per week, achieved through a moderate calorie deficit.",
+        "A calorie deficit of roughly 500 kcal per day typically leads to about 0.5 kg of weight loss per week."
+      ],
+      "metrics": {
+        "retrieved_count": 3,
+        "expected_count": 1,
+        "matched_count": 1,
+        "precision": 0.3333333333333333,
+        "recall": 1.0,
+        "f1": 0.5,
+        "hit": 1.0,
+        "reciprocal_rank": 1.0
+      }
+    },
+    {
+      "id": "eval_10",
+      "category": "fiber_digestion",
+      "query": "Why should I eat more fiber, vegetables, and whole grains?",
+      "expected_facts": [
+        "Fiber-rich foods like vegetables and whole grains promote satiety and support digestive health."
+      ],
+      "retrieved_facts": [
+        "Fiber-rich foods like vegetables and whole grains promote satiety and support digestive health.",
+        "Drinking water before meals can help with portion control and satiety.",
+        "Extremely low-calorie diets can slow metabolism and are generally not sustainable long-term."
+      ],
+      "metrics": {
+        "retrieved_count": 3,
+        "expected_count": 1,
+        "matched_count": 1,
+        "precision": 0.3333333333333333,
+        "recall": 1.0,
+        "f1": 0.5,
+        "hit": 1.0,
+        "reciprocal_rank": 1.0
+      }
+    },
+    {
+      "id": "eval_11",
+      "category": "food_tracking",
+      "query": "Do I have to track every single calorie perfectly every day to make progress?",
+      "expected_facts": [
+        "Consistency in tracking food intake, even imperfectly, is more effective than occasional perfect tracking."
+      ],
+      "retrieved_facts": [
+        "Consistency in tracking food intake, even imperfectly, is more effective than occasional perfect tracking.",
+        "A calorie deficit of roughly 500 kcal per day typically leads to about 0.5 kg of weight loss per week.",
+        "Sustainable weight management focuses on long-term habits rather than short-term restrictive diets."
+      ],
+      "metrics": {
+        "retrieved_count": 3,
+        "expected_count": 1,
+        "matched_count": 1,
+        "precision": 0.3333333333333333,
+        "recall": 1.0,
+        "f1": 0.5,
+        "hit": 1.0,
+        "reciprocal_rank": 1.0
+      }
+    },
+    {
+      "id": "eval_12",
+      "category": "stress_sleep",
+      "query": "Can chronic stress and lack of sleep hinder my fat loss even if my diet is good?",
+      "expected_facts": [
+        "Stress and poor sleep can affect weight management independent of diet and exercise.",
+        "Sleep deprivation can increase hunger hormones and make weight management harder."
+      ],
+      "retrieved_facts": [
+        "Stress and poor sleep can affect weight management independent of diet and exercise.",
+        "Sleep deprivation can increase hunger hormones and make weight management harder.",
+        "Extremely low-calorie diets can slow metabolism and are generally not sustainable long-term."
+      ],
+      "metrics": {
+        "retrieved_count": 3,
+        "expected_count": 2,
+        "matched_count": 2,
+        "precision": 0.6666666666666666,
+        "recall": 1.0,
+        "f1": 0.8,
+        "hit": 1.0,
+        "reciprocal_rank": 1.0
+      }
+    },
+    {
+      "id": "eval_13",
+      "category": "body_composition",
+      "query": "Why is the scale not moving even though my clothes fit looser?",
+      "expected_facts": [
+        "Muscle weighs more densely than fat, so body composition changes may not always show on the scale."
+      ],
+      "retrieved_facts": [
+        "Sudden large weight changes on the scale are often water weight, not fat gain or loss.",
+        "Muscle weighs more densely than fat, so body composition changes may not always show on the scale.",
+        "Weight loss plateaus are common and often due to metabolic adaptation, water retention, or underestimated calorie intake."
+      ],
+      "metrics": {
+        "retrieved_count": 3,
+        "expected_count": 1,
+        "matched_count": 1,
+        "precision": 0.3333333333333333,
+        "recall": 1.0,
+        "f1": 0.5,
+        "hit": 1.0,
+        "reciprocal_rank": 0.5
+      }
+    },
+    {
+      "id": "eval_14",
+      "category": "water_weight",
+      "query": "I woke up 2 kg heavier overnight, did I gain 2 kg of fat?",
+      "expected_facts": [
+        "Sudden large weight changes on the scale are often water weight, not fat gain or loss."
+      ],
+      "retrieved_facts": [
+        "Sudden large weight changes on the scale are often water weight, not fat gain or loss.",
+        "Stress and poor sleep can affect weight management independent of diet and exercise.",
+        "Muscle weighs more densely than fat, so body composition changes may not always show on the scale."
+      ],
+      "metrics": {
+        "retrieved_count": 3,
+        "expected_count": 1,
+        "matched_count": 1,
+        "precision": 0.3333333333333333,
+        "recall": 1.0,
+        "f1": 0.5,
+        "hit": 1.0,
+        "reciprocal_rank": 1.0
+      }
+    },
+    {
+      "id": "eval_15",
+      "category": "sustainable_habits",
+      "query": "What is the key to maintaining weight loss over the long term?",
+      "expected_facts": [
+        "Sustainable weight management focuses on long-term habits rather than short-term restrictive diets."
+      ],
+      "retrieved_facts": [
+        "Sustainable weight management focuses on long-term habits rather than short-term restrictive diets.",
+        "Weight loss plateaus are common and often due to metabolic adaptation, water retention, or underestimated calorie intake.",
+        "Strength training combined with a calorie deficit helps preserve muscle mass while losing fat."
+      ],
+      "metrics": {
+        "retrieved_count": 3,
+        "expected_count": 1,
+        "matched_count": 1,
+        "precision": 0.3333333333333333,
+        "recall": 1.0,
+        "f1": 0.5,
+        "hit": 1.0,
+        "reciprocal_rank": 1.0
+      }
+    },
+    {
+      "id": "eval_16",
+      "category": "muscle_preservation_composite",
+      "query": "How can I combine strength workouts and protein intake to protect my muscles while cutting calories?",
+      "expected_facts": [
+        "Protein intake of around 1.6 to 2.2 grams per kg of body weight supports muscle retention during weight loss.",
+        "Strength training combined with a calorie deficit helps preserve muscle mass while losing fat."
+      ],
+      "retrieved_facts": [
+        "Strength training combined with a calorie deficit helps preserve muscle mass while losing fat.",
+        "Protein intake of around 1.6 to 2.2 grams per kg of body weight supports muscle retention during weight loss.",
+        "Weight gain for muscle building typically requires a calorie surplus of 250 to 500 kcal per day."
+      ],
+      "metrics": {
+        "retrieved_count": 3,
+        "expected_count": 2,
+        "matched_count": 2,
+        "precision": 0.6666666666666666,
+        "recall": 1.0,
+        "f1": 0.8,
+        "hit": 1.0,
+        "reciprocal_rank": 1.0
+      }
+    },
+    {
+      "id": "eval_17",
+      "category": "deficit_and_rate_composite",
+      "query": "What daily deficit and weekly weight loss rate are recommended for healthy slimming?",
+      "expected_facts": [
+        "A safe rate of weight loss is about 0.5 to 1 kg per week, achieved through a moderate calorie deficit.",
+        "A calorie deficit of roughly 500 kcal per day typically leads to about 0.5 kg of weight loss per week."
+      ],
+      "retrieved_facts": [
+        "A safe rate of weight loss is about 0.5 to 1 kg per week, achieved through a moderate calorie deficit.",
+        "A calorie deficit of roughly 500 kcal per day typically leads to about 0.5 kg of weight loss per week.",
+        "Sustainable weight management focuses on long-term habits rather than short-term restrictive diets."
+      ],
+      "metrics": {
+        "retrieved_count": 3,
+        "expected_count": 2,
+        "matched_count": 2,
+        "precision": 0.6666666666666666,
+        "recall": 1.0,
+        "f1": 0.8,
+        "hit": 1.0,
+        "reciprocal_rank": 1.0
+      }
+    },
+    {
+      "id": "eval_18",
+      "category": "plateau_water_composite",
+      "query": "Could water retention or slowed metabolism be stalling my scale progress?",
+      "expected_facts": [
+        "Weight loss plateaus are common and often due to metabolic adaptation, water retention, or underestimated calorie intake.",
+        "Sudden large weight changes on the scale are often water weight, not fat gain or loss."
+      ],
+      "retrieved_facts": [
+        "Weight loss plateaus are common and often due to metabolic adaptation, water retention, or underestimated calorie intake.",
+        "Sudden large weight changes on the scale are often water weight, not fat gain or loss.",
+        "Extremely low-calorie diets can slow metabolism and are generally not sustainable long-term."
+      ],
+      "metrics": {
+        "retrieved_count": 3,
+        "expected_count": 2,
+        "matched_count": 2,
+        "precision": 0.6666666666666666,
+        "recall": 1.0,
+        "f1": 0.8,
+        "hit": 1.0,
+        "reciprocal_rank": 1.0
+      }
+    },
+    {
+      "id": "eval_19",
+      "category": "crash_diet_composite",
+      "query": "Why do crash diets usually fail over the long haul?",
+      "expected_facts": [
+        "Extremely low-calorie diets can slow metabolism and are generally not sustainable long-term.",
+        "Sustainable weight management focuses on long-term habits rather than short-term restrictive diets."
+      ],
+      "retrieved_facts": [
+        "Extremely low-calorie diets can slow metabolism and are generally not sustainable long-term.",
+        "Sustainable weight management focuses on long-term habits rather than short-term restrictive diets.",
+        "Weight loss plateaus are common and often due to metabolic adaptation, water retention, or underestimated calorie intake."
+      ],
+      "metrics": {
+        "retrieved_count": 3,
+        "expected_count": 2,
+        "matched_count": 2,
+        "precision": 0.6666666666666666,
+        "recall": 1.0,
+        "f1": 0.8,
+        "hit": 1.0,
+        "reciprocal_rank": 1.0
+      }
+    },
+    {
+      "id": "eval_20",
+      "category": "fiber_water_satiety_composite",
+      "query": "How do high-fiber foods and drinking water help with staying full and portion control?",
+      "expected_facts": [
+        "Drinking water before meals can help with portion control and satiety.",
+        "Fiber-rich foods like vegetables and whole grains promote satiety and support digestive health."
+      ],
+      "retrieved_facts": [
+        "Drinking water before meals can help with portion control and satiety.",
+        "Fiber-rich foods like vegetables and whole grains promote satiety and support digestive health.",
+        "Sustainable weight management focuses on long-term habits rather than short-term restrictive diets."
+      ],
+      "metrics": {
+        "retrieved_count": 3,
+        "expected_count": 2,
+        "matched_count": 2,
+        "precision": 0.6666666666666666,
+        "recall": 1.0,
+        "f1": 0.8,
+        "hit": 1.0,
+        "reciprocal_rank": 1.0
+      }
+    },
+    {
+      "id": "eval_21",
+      "category": "out_of_scope",
+      "query": "What is the capital of Japan?",
+      "expected_facts": [],
+      "retrieved_facts": [
+        "Strength training combined with a calorie deficit helps preserve muscle mass while losing fat.",
+        "Stress and poor sleep can affect weight management independent of diet and exercise.",
+        "Protein intake of around 1.6 to 2.2 grams per kg of body weight supports muscle retention during weight loss."
+      ],
+      "metrics": {
+        "retrieved_count": 3,
+        "expected_count": 0,
+        "matched_count": 0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "hit": 0.0,
+        "reciprocal_rank": 0.0
+      }
+    },
+    {
+      "id": "eval_22",
+      "category": "out_of_scope",
+      "query": "Can you fix a syntax error in my Python code?",
+      "expected_facts": [],
+      "retrieved_facts": [
+        "Fiber-rich foods like vegetables and whole grains promote satiety and support digestive health.",
+        "A calorie deficit of roughly 500 kcal per day typically leads to about 0.5 kg of weight loss per week.",
+        "Sleep deprivation can increase hunger hormones and make weight management harder."
+      ],
+      "metrics": {
+        "retrieved_count": 3,
+        "expected_count": 0,
+        "matched_count": 0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "hit": 0.0,
+        "reciprocal_rank": 0.0
+      }
+    },
+    {
+      "id": "eval_23",
+      "category": "out_of_scope",
+      "query": "What are the best brand names of running shoes to buy?",
+      "expected_facts": [],
+      "retrieved_facts": [
+        "Sustainable weight management focuses on long-term habits rather than short-term restrictive diets.",
+        "Fiber-rich foods like vegetables and whole grains promote satiety and support digestive health.",
+        "Extremely low-calorie diets can slow metabolism and are generally not sustainable long-term."
+      ],
+      "metrics": {
+        "retrieved_count": 3,
+        "expected_count": 0,
+        "matched_count": 0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "hit": 0.0,
+        "reciprocal_rank": 0.0
+      }
+    },
+    {
+      "id": "eval_24",
+      "category": "out_of_scope",
+      "query": "How do I change the oil filter on a Honda Civic?",
+      "expected_facts": [],
+      "retrieved_facts": [
+        "Drinking water before meals can help with portion control and satiety.",
+        "Protein intake of around 1.6 to 2.2 grams per kg of body weight supports muscle retention during weight loss.",
+        "A safe rate of weight loss is about 0.5 to 1 kg per week, achieved through a moderate calorie deficit."
+      ],
+      "metrics": {
+        "retrieved_count": 3,
+        "expected_count": 0,
+        "matched_count": 0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "hit": 0.0,
+        "reciprocal_rank": 0.0
+      }
+    }
+  ]
+}

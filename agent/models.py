@@ -26,6 +26,10 @@ class AgentDecision(models.Model):
     # NEW: Logs the exact tool calls and arguments Gemini chose
     tools_called = models.JSONField(default=list, blank=True)
 
+    # NEW (Task 2a): ordered reasoning timeline shown on the decision page.
+    # Each step: {"kind", "title", "detail", "data"}
+    trace = models.JSONField(default=list, blank=True)
+
     # Human-readable explanation
     reasoning_text = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)

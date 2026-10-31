@@ -462,3 +462,73 @@ footer {
     transition: background 0.15s ease;
 }
 .pill:hover { background: var(--primary); color: #fff; }
+
+
+/* ============================================================
+   Agent reasoning timeline (decision detail page)
+   ============================================================ */
+
+.timeline { list-style: none; margin: 18px 0 0; padding: 0 0 0 4px; }
+.tl-step { position: relative; display: flex; gap: 14px; padding-bottom: 20px; }
+.tl-step:last-child { padding-bottom: 0; }
+/* vertical connector line between dots */
+.tl-step::before {
+    content: '';
+    position: absolute;
+    left: 6px; top: 16px; bottom: -2px;
+    width: 2px;
+    background: var(--line);
+}
+.tl-step:last-child::before { display: none; }
+
+.tl-dot {
+    flex-shrink: 0;
+    width: 14px; height: 14px;
+    margin-top: 3px;
+    border-radius: 50%;
+    background: var(--ink-soft);
+    border: 2px solid var(--surface);
+    box-shadow: 0 0 0 1px var(--line);
+    z-index: 1;
+}
+.tl-observe .tl-dot  { background: #6B7C93; }
+.tl-style .tl-dot    { background: var(--accent); }
+.tl-offer .tl-dot    { background: #8E7CC3; }
+.tl-model .tl-dot    { background: var(--ink); }
+.tl-call .tl-dot     { background: var(--primary); }
+.tl-result .tl-dot   { background: var(--primary-dark); }
+.tl-decision .tl-dot { background: var(--primary-dark); box-shadow: 0 0 0 3px var(--primary-tint); }
+.tl-fallback .tl-dot,
+.tl-error .tl-dot    { background: var(--danger); }
+
+.tl-body { min-width: 0; flex: 1; }
+.tl-title { font-weight: 500; color: var(--ink); line-height: 1.35; }
+.tl-call .tl-title { font-family: var(--mono); font-size: 0.92rem; color: var(--primary-dark); }
+.tl-decision .tl-title { font-family: var(--serif); font-size: 1.1rem; }
+.tl-error .tl-title, .tl-fallback .tl-title { color: var(--danger); }
+.tl-detail { color: var(--ink-soft); font-size: 0.9rem; line-height: 1.5; margin-top: 2px; word-break: break-word; }
+
+.tl-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.tl-chip {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--line);
+}
+.tl-chip.called  { background: var(--primary-tint); color: var(--primary-dark); border-color: var(--primary); }
+.tl-chip.skipped { background: var(--bg); color: var(--ink-soft); }
+
+.tl-args {
+    margin-top: 8px;
+    padding: 10px 12px;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    line-height: 1.6;
+}
+.tl-key { color: var(--ink-soft); }
+.tl-key::after { content: ':'; }
+.tl-val { color: var(--ink); word-break: break-word; }

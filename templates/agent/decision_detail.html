@@ -1,7 +1,7 @@
 ﻿{% extends "base.html" %}
 {% block title %}Decision detail{% endblock %}
 {% block content %}
-<div class="container" style="max-width:640px; padding:40px 24px 60px;">
+<div class="container" style="max-width:720px; padding:40px 24px 60px;">
 
     <span class="decision-badge {% if decision.decision_type == 'maintain_calories' %}maintain{% elif decision.decision_type == 'increase_calories' %}increase{% elif decision.decision_type == 'decrease_calories' %}decrease{% else %}flag{% endif %}">
         {{ decision.get_decision_type_display }}
@@ -39,6 +39,45 @@
         {% endif %}
     {% endfor %}
 </ul>
+
+        <hr class="divider">
+
+        <h3>Agent reasoning timeline</h3>
+        <p class="text-soft" style="margin-top:0; font-size:0.9rem;">Every step the agent took, in order. Gemini chose the tools; the app only executed them.</p>
+
+        {% if timeline %}
+        <ol class="timeline">
+            {% for step in timeline %}
+            <li class="tl-step tl-{{ step.kind }}">
+                <span class="tl-dot"></span>
+                <div class="tl-body">
+                    <div class="tl-title">{{ step.title }}</div>
+                    {% if step.detail %}<div class="tl-detail">{{ step.detail }}</div>{% endif %}
+
+                    {% if step.data.tools %}
+                    <div class="tl-chips">
+                        {% for t in step.data.tools %}
+                        <span class="tl-chip {% if t.called %}called{% else %}skipped{% endif %}" title="{{ t.description }}">
+                            {{ t.name }}{% if t.called %} ✓{% else %} · not called{% endif %}
+                        </span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    {% if step.data.args %}
+                    <div class="tl-args">
+                        {% for key, value in step.data.args.items %}
+                        <div><span class="tl-key">{{ key }}</span> <span class="tl-val">{{ value }}</span></div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </li>
+            {% endfor %}
+        </ol>
+        {% else %}
+        <p class="text-soft">No timeline was recorded for this decision.</p>
+        {% endif %}
 
         <hr class="divider">
 
