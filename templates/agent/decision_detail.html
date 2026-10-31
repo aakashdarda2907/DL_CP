@@ -7,7 +7,7 @@
         {{ decision.get_decision_type_display }}
     </span>
     <h2 class="mt-0">{{ decision.get_decision_type_display }}</h2>
-    <p class="text-soft">{{ decision.created_at|date:"M d, Y H:i" }}</p>
+    <p class="text-soft">{{ decision.created_at|date:"M d, Y H:i" }}{% if decision.observed_data.coaching_style %}<span class="style-chip">{{ decision.observed_data.coaching_style }} coach</span>{% endif %}</p>
 
     <div class="surface">
         <div class="obs-grid">

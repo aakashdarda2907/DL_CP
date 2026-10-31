@@ -9,13 +9,13 @@ class CustomUserAdmin(UserAdmin):
     in the admin panel instead of being hidden.
     """
     model = CustomUser
-    list_display = ['username', 'email', 'goal', 'current_weight_kg', 'target_weight_kg', 'is_staff']
+    list_display = ['username', 'email', 'goal', 'coaching_style', 'current_weight_kg', 'target_weight_kg', 'is_staff']
 
     fieldsets = UserAdmin.fieldsets + (
         ('Fitness Profile', {
             'fields': (
                 'height_cm', 'current_weight_kg', 'target_weight_kg',
-                'age', 'gender', 'goal', 'activity_level', 'current_calorie_target',
+                'age', 'gender', 'goal', 'activity_level', 'coaching_style', 'current_calorie_target',
             )
         }),
     )

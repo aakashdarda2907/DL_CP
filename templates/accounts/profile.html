@@ -33,6 +33,35 @@
                     </select>
                 </div>
             </div>
+
+            <div class="field">
+                <label>Coaching style</label>
+                <p class="text-soft" style="margin:0 0 10px; font-size:0.88rem;">Changes how your AI coach talks to you <em>and</em> how quickly it adjusts your calories.</p>
+                <div class="style-options">
+                    <label class="style-option">
+                        <input type="radio" name="coaching_style" value="strict" {% if user_obj.coaching_style == 'strict' %}checked{% endif %}>
+                        <span class="style-card">
+                            <strong>Strict</strong>
+                            <span>Direct and firm. Quick to adjust calories when you drift off goal.</span>
+                        </span>
+                    </label>
+                    <label class="style-option">
+                        <input type="radio" name="coaching_style" value="motivational" {% if user_obj.coaching_style == 'motivational' or not user_obj.coaching_style %}checked{% endif %}>
+                        <span class="style-card">
+                            <strong>Motivational</strong>
+                            <span>Upbeat and balanced. Celebrates wins, adjusts at a moderate pace.</span>
+                        </span>
+                    </label>
+                    <label class="style-option">
+                        <input type="radio" name="coaching_style" value="gentle" {% if user_obj.coaching_style == 'gentle' %}checked{% endif %}>
+                        <span class="style-card">
+                            <strong>Gentle</strong>
+                            <span>Kind and patient. Prefers keeping the plan and building consistency first.</span>
+                        </span>
+                    </label>
+                </div>
+            </div>
+
             <button type="submit" class="btn btn-primary">Save changes</button>
         </form>
     </div>

@@ -99,6 +99,12 @@ def profile_view(request):
         user.gender = request.POST.get('gender', user.gender)
         user.goal = request.POST.get('goal', user.goal)
         user.activity_level = request.POST.get('activity_level', user.activity_level)
+
+        # Only accept a coaching style that actually exists (ignore tampered values)
+        chosen_style = request.POST.get('coaching_style')
+        if chosen_style in dict(CustomUser.COACHING_STYLE_CHOICES):
+            user.coaching_style = chosen_style
+
         user.save()
         messages.success(request, 'Profile updated.')
         return redirect('accounts:profile')

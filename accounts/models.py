@@ -22,6 +22,12 @@ class CustomUser(AbstractUser):
         ('active', 'Very Active (6-7 days/week)'),
     ]
 
+    COACHING_STYLE_CHOICES = [
+        ('strict', 'Strict'),
+        ('motivational', 'Motivational'),
+        ('gentle', 'Gentle'),
+    ]
+
     GENDER_CHOICES = [
         ('male', 'Male'),
         ('female', 'Female'),
@@ -35,6 +41,9 @@ class CustomUser(AbstractUser):
     gender = models.CharField(max_length=10, choices=GENDER_CHOICES, blank=True)
     goal = models.CharField(max_length=10, choices=GOAL_CHOICES, default='maintain')
     activity_level = models.CharField(max_length=15, choices=ACTIVITY_CHOICES, default='sedentary')
+
+    # How the AI coach talks to the user AND how eagerly it adjusts calories
+    coaching_style = models.CharField(max_length=15, choices=COACHING_STYLE_CHOICES, default='motivational')
 
     # Computed/cached target — updated by the agent, not the user directly
     current_calorie_target = models.PositiveIntegerField(null=True, blank=True)

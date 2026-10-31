@@ -65,12 +65,12 @@ class AgentToolSelectionTests(TestCase):
     def test_gaining_while_losing_decreases_calories(self):
         user = make_user(adherence=5)
         d, _ = run(user, fake_response(("adjust_macros", {
-            "adjustment_type": "decrease", "percentage_change": 10.0, "current_calories": 2000,
+            "adjustment_type": "decrease", "percentage_change": 5.0, "current_calories": 2000,
             "reason": "Weight is rising while your goal is loss."})))
         self.assertEqual(d.decision_type, "decrease_calories")
-        self.assertEqual(d.new_calorie_target, 1800)
+        self.assertEqual(d.new_calorie_target, 1900)
         user.refresh_from_db()
-        self.assertEqual(user.current_calorie_target, 1800)
+        self.assertEqual(user.current_calorie_target, 1900)
 
     def test_on_track_maintains_and_suggests_recipe(self):
         user = make_user(goal="lose", adherence=5, first_w=80.0, last_w=79.0)
@@ -102,11 +102,12 @@ class AgentSafetyFallbackTests(TestCase):
                                                                   "percentage_change": "banana"})))
         self.assertEqual(d.decision_type, "flag_for_review")
 
-    def test_percentage_is_clamped_by_tool(self):
+    def test_huge_percentage_is_clamped(self):
         user = make_user()
         d, _ = run(user, fake_response(("adjust_macros", {"adjustment_type": "decrease",
                                                           "percentage_change": 90.0, "reason": "x"})))
-        self.assertEqual(d.new_calorie_target, 1700)  # max 15% of 2000
+        # default style is motivational -> capped at 7% (and the tool itself never exceeds 15%)
+        self.assertEqual(d.new_calorie_target, 1860)
 
 
 class TimelineTests(TestCase):
@@ -115,7 +116,7 @@ class TimelineTests(TestCase):
         d, _ = run(user, fake_response(("adjust_macros", {"adjustment_type": "decrease",
                                                           "percentage_change": 5.0, "reason": "Trending up."})))
         kinds = [s["kind"] for s in d.trace]
-        self.assertEqual(kinds, ["observe", "offer", "model", "call", "result", "decision"])
+        self.assertEqual(kinds, ["observe", "style", "offer", "model", "call", "result", "decision"])
         offer = next(s for s in d.trace if s["kind"] == "offer")
         called = {t["name"]: t["called"] for t in offer["data"]["tools"]}
         self.assertEqual(called, {"adjust_macros": True, "flag_for_review": False, "suggest_recipe": False})
@@ -141,3 +142,85 @@ class TimelineTests(TestCase):
         d, _ = run(owner, fake_response(("flag_for_review", {"reason": "r"})))
         self.client.force_login(intruder)
         self.assertEqual(self.client.get(reverse("agent:decision_detail", args=[d.id])).status_code, 404)
+
+
+# ============================================================
+# Task 2b: coaching styles
+# ============================================================
+class CoachingStyleTests(TestCase):
+    def _user(self, style, name):
+        return CustomUser.objects.create_user(
+            username=name, password="x" * 10, goal="lose", current_calorie_target=2000, coaching_style=style)
+
+    def _seed(self, user, adherence=5, first_w=80.0, last_w=80.4):
+        for w in (first_w, last_w):
+            WeightEntry.objects.create(user=user, weight_kg=w)
+        DailyCheckIn.objects.create(user=user, adherence_score=adherence)
+
+    def test_default_style_is_motivational(self):
+        self.assertEqual(CustomUser.objects.create_user(username="d", password="x" * 10).coaching_style, "motivational")
+
+    def test_each_style_sends_a_different_prompt_to_gemini(self):
+        prompts = {}
+        for style in ("strict", "motivational", "gentle"):
+            u = self._user(style, "u_" + style)
+            self._seed(u)
+            _, client = run(u, fake_response(("adjust_macros", {"adjustment_type": "maintain",
+                                                                "percentage_change": 0, "reason": "ok"})))
+            prompts[style] = client.last_kwargs["contents"]
+        self.assertIn("STRICT coaching style", prompts["strict"])
+        self.assertIn("at least\n   0.3 kg", prompts["strict"])
+        self.assertIn("at least\n   0.5 kg", prompts["motivational"])
+        self.assertIn("at least\n   1.0 kg", prompts["gentle"])
+        self.assertIn("do NOT increase or decrease calories", prompts["gentle"])
+        self.assertEqual(len(set(prompts.values())), 3)
+
+    def test_style_is_logged_in_observed_data_and_timeline(self):
+        u = self._user("gentle", "g")
+        self._seed(u)
+        d, _ = run(u, fake_response(("adjust_macros", {"adjustment_type": "maintain", "percentage_change": 0, "reason": "ok"})))
+        self.assertEqual(d.observed_data["coaching_style"], "gentle")
+        self.assertEqual(d.trace[1]["kind"], "style")
+        self.assertIn("Gentle", d.trace[1]["title"])
+
+    def test_gentle_style_caps_oversized_change(self):
+        u = self._user("gentle", "cap")
+        self._seed(u, last_w=82.0)
+        d, _ = run(u, fake_response(("adjust_macros", {"adjustment_type": "decrease", "percentage_change": 15.0, "reason": "r"})))
+        self.assertEqual(d.new_calorie_target, 1900)  # 5% of 2000, not 15%
+        self.assertTrue(any("capped" in s["title"] for s in d.trace))
+
+    def test_strict_style_allows_bigger_change_than_gentle(self):
+        u = self._user("strict", "st")
+        self._seed(u, last_w=82.0)
+        d, _ = run(u, fake_response(("adjust_macros", {"adjustment_type": "decrease", "percentage_change": 10.0, "reason": "r"})))
+        self.assertEqual(d.new_calorie_target, 1800)
+
+    def test_invalid_style_value_falls_back_safely(self):
+        u = self._user("banana", "bad")
+        self._seed(u)
+        d, _ = run(u, fake_response(("adjust_macros", {"adjustment_type": "maintain", "percentage_change": 0, "reason": "ok"})))
+        self.assertEqual(d.observed_data["coaching_style"], "motivational")
+
+    def test_profile_saves_style_and_rejects_garbage(self):
+        u = self._user("motivational", "p")
+        self.client.force_login(u)
+        self.client.post(reverse("accounts:profile"), {"coaching_style": "strict", "goal": "lose"})
+        u.refresh_from_db()
+        self.assertEqual(u.coaching_style, "strict")
+        self.client.post(reverse("accounts:profile"), {"coaching_style": "<script>", "goal": "lose"})
+        u.refresh_from_db()
+        self.assertEqual(u.coaching_style, "strict")  # unchanged
+
+    def test_profile_page_shows_current_style_checked(self):
+        u = self._user("gentle", "pp")
+        self.client.force_login(u)
+        html = self.client.get(reverse("accounts:profile")).content.decode()
+        self.assertIn('value="gentle" checked', html)
+
+    def test_detail_page_shows_style_chip(self):
+        u = self._user("strict", "chip")
+        self._seed(u)
+        d, _ = run(u, fake_response(("adjust_macros", {"adjustment_type": "maintain", "percentage_change": 0, "reason": "ok"})))
+        self.client.force_login(u)
+        self.assertContains(self.client.get(reverse("agent:decision_detail", args=[d.id])), "strict coach")

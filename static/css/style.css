@@ -532,3 +532,44 @@ footer {
 .tl-key { color: var(--ink-soft); }
 .tl-key::after { content: ':'; }
 .tl-val { color: var(--ink); word-break: break-word; }
+
+
+/* ============================================================
+   Coaching style picker (profile page) + style chip (decision page)
+   ============================================================ */
+
+.style-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.style-option { cursor: pointer; display: block; margin: 0; }
+.style-option input { position: absolute; opacity: 0; pointer-events: none; }
+.style-card {
+    display: flex; flex-direction: column; gap: 6px;
+    height: 100%;
+    padding: 14px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+    font-size: 0.84rem;
+    line-height: 1.4;
+    color: var(--ink-soft);
+    transition: border-color 0.15s, background 0.15s;
+}
+.style-card strong { color: var(--ink); font-size: 0.95rem; }
+.style-option:hover .style-card { border-color: var(--ink-soft); }
+.style-option input:checked + .style-card { border-color: var(--primary); background: var(--primary-tint); box-shadow: 0 0 0 1px var(--primary); }
+.style-option input:focus-visible + .style-card { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+.style-chip {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 500;
+    background: var(--accent-tint);
+    color: #8A5A14;
+    text-transform: capitalize;
+}
+
+@media (max-width: 700px) {
+    .style-options { grid-template-columns: 1fr; }
+}
